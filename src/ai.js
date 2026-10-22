@@ -64,7 +64,7 @@ export default async function chatBot(req, res) {
       stream: true,
       generation_config: {
         max_output_tokens: 512,
-        thinking_level: "low",
+        // thinking_level: "low",
       },
     };
 
