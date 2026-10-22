@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#10131b" />
+    <title>Visora AI</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10131b;
+        --panel: #171b26;
+        --panel2: #202536;
+        --border: #30364a;
+        --text: #f3f5fb;
+        --muted: #a0a8bb;
+        --accent: #a99bff;
+        --user: #302b50;
+        --danger: #ff9b9b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(
+            ellipse at 50% -15%,
+            rgba(123, 108, 246, 0.18),
+            transparent 42%
+          ),
+          var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+      }
+      button,
+      textarea {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .app {
+        width: min(100%, 980px);
+        height: 100dvh;
+        min-height: 520px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        padding: 0 20px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 18px 0;
+        border-bottom: 1px solid #ffffff17;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(140deg, #9a8bff, #5949dc);
+        font-weight: 800;
+      }
+      .brand h1 {
+        font-size: 17px;
+        margin: 0;
+      }
+      .brand p {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 4px 0 0;
+      }
+      .quiet,
+      .attach {
+        border: 1px solid var(--border);
+        background: #ffffff06;
+        color: var(--text);
+        border-radius: 11px;
+        padding: 9px 12px;
+        font-size: 12px;
+      }
+      .quiet:hover,
+      .attach:hover {
+        background: var(--panel2);
+      }
+      .messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 28px 2px 24px;
+        scroll-behavior: smooth;
+        scrollbar-width: thin;
+        scrollbar-color: #414760 transparent;
+      }
+      .welcome {
+        max-width: 620px;
+        margin: 7vh auto 0;
+        text-align: center;
+      }
+      .welcome-mark {
+        width: 60px;
+        height: 60px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 18px;
+        border-radius: 21px;
+        background: #a99bff1b;
+        border: 1px solid #a99bff44;
+        font-size: 28px;
+      }
+      .welcome h2 {
+        font-size: clamp(25px, 4vw, 34px);
+        margin: 0 0 10px;
+        letter-spacing: -1px;
+      }
+      .welcome p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+      .suggestions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 24px;
+        text-align: left;
+      }
+      .suggestion {
+        padding: 14px;
+        text-align: left;
+        border: 1px solid var(--border);
+        background: #ffffff05;
+        color: var(--text);
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .suggestion:hover {
+        border-color: #7569c5;
+      }
+      .suggestion span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        margin-top: 5px;
+      }
+      .message-row {
+        display: flex;
+        gap: 11px;
+        align-items: flex-start;
+        max-width: 760px;
+        margin: 0 auto 22px;
+      }
+      .message-row.user {
+        flex-direction: row-reverse;
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--border);
+        border-radius: 11px;
+        background: var(--panel2);
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 750;
+      }
+      .user .avatar {
+        background: #51458f;
+        color: white;
+      }
+      .message-content {
+        min-width: 0;
+        max-width: min(84%, 660px);
+      }
+      .user .message-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      .bubble {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.65;
+        padding: 12px 15px;
+        border: 1px solid var(--border);
+        border-radius: 4px 16px 16px 16px;
+        background: var(--panel);
+        font-size: 14px;
+        min-height: 24px;
+      }
+      .user .bubble {
+        background: var(--user);
+        border-color: #49416d;
+        border-radius: 16px 4px 16px 16px;
+      }
+      .meta {
+        font-size: 11px;
+        color: var(--muted);
+        margin: 6px 3px 0;
+      }
+      .attachment-chip {
+        margin-top: 8px;
+        padding: 7px 10px;
+        border-radius: 10px;
+        background: #ffffff09;
+        border: 1px solid var(--border);
+        font-size: 12px;
+        color: #ddd9ff;
+        overflow-wrap: anywhere;
+      }
+      .error {
+        color: var(--danger);
+      }
+      .typing {
+        display: inline-flex;
+        gap: 4px;
+        padding: 5px 1px;
+      }
+      .typing i {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--muted);
+        animation: pulse 1s infinite ease-in-out;
+      }
+      .typing i:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .typing i:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes pulse {
+        0%,
+        60%,
+        100% {
+          opacity: 0.35;
+          transform: translateY(0);
+        }
+        30% {
+          opacity: 1;
+          transform: translateY(-3px);
+        }
+      }
+      .composer-wrap {
+        padding: 12px 0 18px;
+        border-top: 1px solid #ffffff17;
+      }
+      .composer {
+        border: 1px solid #373d52;
+        background: #171b26f2;
+        border-radius: 19px;
+        padding: 12px;
+        box-shadow: 0 16px 50px #0002;
+      }
+      textarea {
+        display: block;
+        width: 100%;
+        resize: none;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--text);
+        padding: 5px 5px 10px;
+        min-height: 48px;
+        max-height: 180px;
+        line-height: 1.55;
+        font-size: 14px;
+      }
+      textarea::placeholder {
+        color: #777f94;
+      }
+      .composer-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .tools {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .attach {
+        background: var(--panel2);
+        padding: 8px 10px;
+      }
+      .search-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        color: var(--muted);
+        padding: 7px 4px;
+        cursor: pointer;
+      }
+      .search-toggle input {
+        accent-color: #8273ff;
+      }
+      .send {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 15px;
+        color: white;
+        font-weight: 650;
+        font-size: 13px;
+        background: linear-gradient(135deg, #8273ff, #6254e8);
+      }
+      .file-status {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        background: #a99bff12;
+        border: 1px solid #a99bff30;
+        border-radius: 11px;
+        font-size: 12px;
+        color: #ddd9ff;
+      }
+      .file-status.visible {
+        display: flex;
+      }
+      .remove {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-size: 18px;
+      }
+      .hint {
+        color: #777f94;
+        font-size: 10px;
+        text-align: center;
+        margin: 10px 0 0;
+      }
+      .hidden {
+        display: none !important;
+      }
+      @media (max-width: 600px) {
+        .app {
+          padding: 0 12px;
+        }
+        header {
+          padding: 14px 0;
+        }
+        .quiet {
+          padding: 8px;
+        }
+        .messages {
+          padding-top: 20px;
+        }
+        .welcome {
+          margin-top: 5vh;
+        }
+        .suggestions {
+          grid-template-columns: 1fr;
+        }
+        .message-content {
+          max-width: 88%;
+        }
+        .composer {
+          padding: 9px;
+        }
+        .attach {
+          padding: 8px;
+        }
+        .search-toggle {
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <div class="brand">
+          <div class="logo">V</div>
+          <div>
+            <h1>Visora AI</h1>
+            <p>Your multimodal AI assistant</p>
+          </div>
+        </div>
+        <button class="quiet" id="newChatBtn" type="button">＋ New chat</button>
+      </header>
+      <section
+        class="messages"
+        id="messages"
+        aria-live="polite"
+        aria-label="Conversation"
+      >
+        <div class="welcome" id="welcome">
+          <div class="welcome-mark">✦</div>
+          <h2>What can I help you with?</h2>
+          <p>
+            Ask a question, upload an image, or explore a PDF. Turn on web
+            search for current information.
+          </p>
+          <div class="suggestions">
+            <button
+              class="suggestion"
+              data-prompt="Explain RAG in simple terms."
+            >
+              Explain a concept<span
+                >Get a clear, beginner-friendly explanation</span
+              >
+            </button>
+            <button
+              class="suggestion"
+              data-prompt="What are the latest developments in generative AI?"
+            >
+              Explore current news<span
+                >Enable web search for recent information</span
+              >
+            </button>
+            <button
+              class="suggestion"
+              data-prompt="Help me understand this screenshot."
+            >
+              Understand an image<span>Attach a screenshot or photo</span>
+            </button>
+            <button
+              class="suggestion"
+              data-prompt="Summarize this document and list its key points."
+            >
+              Summarize a PDF<span>Upload a document to get started</span>
+            </button>
+          </div>
+        </div>
+      </section>
+      <div class="composer-wrap">
+        <form class="composer" id="chatForm">
+          <div class="file-status" id="fileStatus">
+            <span id="fileName"></span
+            ><button
+              type="button"
+              class="remove"
+              id="removeFileBtn"
+              aria-label="Remove attachment"
+            >
+              ×
+            </button>
+          </div>
+          <textarea
+            id="messageInput"
+            placeholder="Message Visora AI..."
+            rows="1"
+            aria-label="Message"
+          ></textarea>
+          <div class="composer-bottom">
+            <div class="tools">
+              <button class="attach" type="button" id="imageBtn">
+                ＋ Image
+              </button>
+              <button class="attach" type="button" id="pdfBtn">＋ PDF</button>
+              <label class="search-toggle"
+                ><input type="checkbox" id="webSearchToggle" /> Web
+                search</label
+              >
+            </div>
+            <button class="send" type="submit" id="sendBtn">Send ↑</button>
+          </div>
+          <input class="hidden" type="file" id="imageInput" accept="image/*" />
+          <input
+            class="hidden"
+            type="file"
+            id="pdfInput"
+            accept="application/pdf,.pdf"
+          />
+        </form>
+        <p class="hint">
+          Images up to 1 MB · PDFs up to 2 MB · Enter to send, Shift + Enter for
+          a new line
+        </p>
+      </div>
+    </main>
+    <script>
+      const CHAT_ENDPOINT = "/api/chat";
+      const IMAGE_LIMIT = 1 * 1024 * 1024; // 1 MB
+      const PDF_LIMIT = 2 * 1024 * 1024; // 2 MB
+
+      const form = document.getElementById("chatForm");
+      const messages = document.getElementById("messages");
+      const welcome = document.getElementById("welcome");
+      const messageInput = document.getElementById("messageInput");
+      const imageInput = document.getElementById("imageInput");
+      const pdfInput = document.getElementById("pdfInput");
+      const imageBtn = document.getElementById("imageBtn");
+      const pdfBtn = document.getElementById("pdfBtn");
+      const sendBtn = document.getElementById("sendBtn");
+      const newChatBtn = document.getElementById("newChatBtn");
+      const webSearchToggle = document.getElementById("webSearchToggle");
+      const fileStatus = document.getElementById("fileStatus");
+      const fileName = document.getElementById("fileName");
+      const removeFileBtn = document.getElementById("removeFileBtn");
+
+      let selectedImage = null;
+      let selectedPdf = null;
+      let isSending = false;
+
+      function scrollToBottom() {
+        messages.scrollTop = messages.scrollHeight;
+      }
+      function hideWelcome() {
+        welcome.classList.add("hidden");
+      }
+      function resizeTextarea() {
+        messageInput.style.height = "auto";
+        messageInput.style.height =
+          Math.min(messageInput.scrollHeight, 180) + "px";
+      }
+      function showAttachment() {
+        const file = selectedImage || selectedPdf;
+        if (!file) {
+          fileStatus.classList.remove("visible");
+          fileName.textContent = "";
+          return;
+        }
+        fileName.textContent = `${selectedImage ? "Image" : "PDF"}: ${file.name}`;
+        fileStatus.classList.add("visible");
+      }
+      function clearAttachment() {
+        selectedImage = null;
+        selectedPdf = null;
+        imageInput.value = "";
+        pdfInput.value = "";
+        showAttachment();
+      }
+      function addMessage(role, text = "", attachment = null) {
+        hideWelcome();
+        const row = document.createElement("div");
+        row.className = `message-row ${role}`;
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = role === "user" ? "You" : "V";
+        const content = document.createElement("div");
+        content.className = "message-content";
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = text;
+        content.appendChild(bubble);
+        if (attachment) {
+          const chip = document.createElement("div");
+          chip.className = "attachment-chip";
+          chip.textContent = `${attachment.kind === "image" ? "▧ Image" : "▤ PDF"} · ${attachment.name}`;
+          content.appendChild(chip);
+        }
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = role === "user" ? "You" : "Visora AI";
+        content.appendChild(meta);
+        row.append(avatar, content);
+        messages.appendChild(row);
+        scrollToBottom();
+        return { bubble, meta };
+      }
+      function showError(message) {
+        const result = addMessage("assistant", message);
+        result.bubble.classList.add("error");
+      }
+      function setBusy(busy) {
+        isSending = busy;
+        sendBtn.disabled = busy;
+        imageBtn.disabled = busy;
+        pdfBtn.disabled = busy;
+        newChatBtn.disabled = busy;
+        sendBtn.textContent = busy ? "Thinking…" : "Send ↑";
+      }
+      function showTyping() {
+        const result = addMessage("assistant");
+        result.bubble.innerHTML =
+          '<span class="typing" aria-label="Visora AI is responding"><i></i><i></i><i></i></span>';
+        return result;
+      }
+
+      imageBtn.addEventListener("click", () => imageInput.click());
+      pdfBtn.addEventListener("click", () => pdfInput.click());
+      imageInput.addEventListener("change", () => {
+        const file = imageInput.files[0];
+        if (!file) return;
+        if (file.size > IMAGE_LIMIT) {
+          clearAttachment();
+          showError("Images must be 2 MB or smaller.");
+          return;
+        }
+        if (!file.type.startsWith("image/")) {
+          clearAttachment();
+          showError("Please select a valid image.");
+          return;
+        }
+        selectedImage = file;
+        selectedPdf = null;
+        pdfInput.value = "";
+        showAttachment();
+      });
+      pdfInput.addEventListener("change", () => {
+        const file = pdfInput.files[0];
+        if (!file) return;
+        if (file.size > PDF_LIMIT) {
+          clearAttachment();
+          showError("PDFs must be 5 MB or smaller.");
+          return;
+        }
+        if (
+          file.type !== "application/pdf" &&
+          !file.name.toLowerCase().endsWith(".pdf")
+        ) {
+          clearAttachment();
+          showError("Please select a PDF file.");
+          return;
+        }
+        selectedPdf = file;
+        selectedImage = null;
+        imageInput.value = "";
+        showAttachment();
+      });
+      removeFileBtn.addEventListener("click", clearAttachment);
+
+      document.querySelectorAll(".suggestion").forEach((button) => {
+        button.addEventListener("click", () => {
+          messageInput.value = button.dataset.prompt || "";
+          resizeTextarea();
+          messageInput.focus();
+        });
+      });
+      messageInput.addEventListener("input", resizeTextarea);
+      messageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          form.requestSubmit();
+        }
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (isSending) return;
+
+        const message = messageInput.value.trim();
+        if (!message && !selectedImage && !selectedPdf) {
+          messageInput.focus();
+          return;
+        }
+
+        const attachment = selectedImage
+          ? { kind: "image", name: selectedImage.name }
+          : selectedPdf
+            ? { kind: "pdf", name: selectedPdf.name }
+            : null;
+
+        addMessage(
+          "user",
+          message ||
+            (selectedImage ? "Describe this image." : "Summarize this PDF."),
+          attachment,
+        );
+
+        const formData = new FormData();
+        formData.append("message", message);
+        formData.append("webSearch", String(webSearchToggle.checked));
+        if (selectedImage) formData.append("image", selectedImage);
+        if (selectedPdf) formData.append("pdf", selectedPdf);
+
+        messageInput.value = "";
+        resizeTextarea();
+        clearAttachment();
+        setBusy(true);
+
+        const assistant = showTyping();
+        let answer = "";
+
+        try {
+          const response = await fetch(CHAT_ENDPOINT, {
+            method: "POST",
+            body: formData,
+          });
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              errorText || `Request failed (HTTP ${response.status}).`,
+            );
+          }
+          if (!response.body)
+            throw new Error("Streaming is not supported by this browser.");
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          assistant.bubble.textContent = "";
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            answer += decoder.decode(value, { stream: true });
+            assistant.bubble.textContent = answer;
+            scrollToBottom();
+          }
+          answer += decoder.decode();
+          assistant.bubble.textContent =
+            answer || "I couldn't generate a response.";
+          scrollToBottom();
+        } catch (error) {
+          console.error("Chat request failed:", error);
+          assistant.bubble.textContent =
+            error instanceof TypeError
+              ? "Unable to reach the server. Check that your backend is running."
+              : error.message || "Something went wrong. Please try again.";
+          assistant.bubble.classList.add("error");
+        } finally {
+          setBusy(false);
+          messageInput.focus();
+        }
+      });
+
+      newChatBtn.addEventListener("click", async () => {
+        if (isSending) return;
+        newChatBtn.disabled = true;
+        try {
+          const response = await fetch(CHAT_ENDPOINT, { method: "DELETE" });
+          if (!response.ok)
+            throw new Error("Could not clear the conversation.");
+          messages.innerHTML = "";
+          messages.appendChild(welcome);
+          welcome.classList.remove("hidden");
+          clearAttachment();
+          messageInput.value = "";
+          resizeTextarea();
+          webSearchToggle.checked = false;
+          messageInput.focus();
+          scrollToBottom();
+        } catch (error) {
+          showError(error.message || "Could not clear the conversation.");
+        } finally {
+          newChatBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
